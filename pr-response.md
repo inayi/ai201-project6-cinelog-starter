@@ -11,7 +11,11 @@ An AI Usage section: at least one specific use of AI tools during the project, O
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
-I used Copilot in VSCode to explain files in this codebase.
+I used Copilot in VSCode to orient myself in the codebase, especially to understand how the watchlist service, routes, and SQLAlchemy models fit together. I also used it to sanity-check my review responses and commit-message wording, including whether the watchlist sort-order change was better described as a fix or a feature.
+
+For Comment 4, I asked what a careful reviewer might object to about a public-by-default watchlist. The AI helped surface the privacy-vs-discovery tradeoff, but I adjusted the final response to make the privacy concern more explicit and to acknowledge that private-by-default with opt-in sharing is the more privacy-conscious design.
+
+For Comment 5, I asked whether the sort-order change should be described as a fix, feature, perf, chore, or style change. The AI's guidance supported `fix:` as the best fit, and I kept that reasoning because the change corrects the default behavior rather than adding a new user-facing capability.
 
 ## Comment 1 — Rename
 **What I did:**
@@ -52,7 +56,7 @@ I updated the changes in watchlist_service.py to match the intent of the feature
 **What conflicted:**
 .gitignore, my version has .pytest_cache/ but the other version doesn't
 **How I resolved it:**
-Kept my version since my version contains the other version's contents
+Kept my version because it already included the other commit's .gitignore entries and only added the missing .pytest_cache/ rule, so no ignore behavior was lost.
 **How I verified no conflict remains:**
 I reran git rebase --continue and it didn't raise conflict.
 
@@ -63,11 +67,11 @@ I added a watchlist test for adding a nonexistent film because it checks the ser
 I updated the watchlist add endpoint so callers can pass `public` explicitly instead of relying only on the default. This makes the visibility choice intentional at the API level, and I added a test that posts `public: false` to confirm the watchlist entry is saved as private when requested.
 
 ## PR Description
-The watchlist feature lets a user save films for later, view the saved list, and remove films they no longer want to keep. The service layer now includes `add_to_watchlist()`, `remove_from_watchlist()`, and `get_watchlist()`, and the route layer exposes GET, POST, and DELETE endpoints that follow the same pattern as the collection feature.
+The watchlist feature lets a user save films for later, view the saved list, and remove films they no longer want to keep. The service layer includes `add_to_watchlist()`, `remove_from_watchlist()`, and `get_watchlist()`, and the route layer exposes matching GET, POST, and DELETE endpoints.
 
-Design-wise, the feature keeps watchlists public by default so the list can support discovery and sharing, and it sorts entries by `date_added` so the newest saves appear first. The add path also prevents duplicates by checking whether a user already has the same film saved before inserting a new row.
+The first design decision was the visibility default: watchlists default to `public=True` so they can support discovery and sharing, while still allowing callers to override visibility explicitly when needed. The second design decision was the sort order: watchlist entries are returned by `date_added` so the newest saves appear first instead of sorting alphabetically.
 
-To manually test the feature, start the app, add a film to a user's watchlist with `POST /watchlist/<user_id>/add`, verify it appears with `GET /watchlist/<user_id>`, try the same add again to confirm the duplicate error, and then remove it with `DELETE /watchlist/<user_id>/remove`. After removal, `GET /watchlist/<user_id>` should no longer include that film.
+To manually test the feature, start the app, send `POST /watchlist/<user_id>/add` with a `film_id` and optional `public` value, confirm the film appears with `GET /watchlist/<user_id>`, repeat the add request to verify the duplicate error, and then send `DELETE /watchlist/<user_id>/remove` with the same `film_id`. After the delete, `GET /watchlist/<user_id>` should no longer show that film.
 
 ## git log screenshot
 
