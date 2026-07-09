@@ -27,12 +27,14 @@ def test_add_to_watchlist_creates_entry(app, sample_user, sample_film):
         assert entry is not None
         assert entry.user_id == sample_user
         assert entry.film_id == sample_film
+        assert entry.public is True
 
         # Verify it persisted
         in_db = WatchlistEntry.query.filter_by(
             user_id=sample_user, film_id=sample_film
         ).first()
         assert in_db is not None
+        assert in_db.public is True
 
 # ── Deduplication ────────────────────────────────────────────────────────────
 
@@ -62,6 +64,27 @@ def test_add_to_watchlist_nonexistent_film_raises(app, sample_user):
 
         with pytest.raises(FilmNotFoundError):
             add_to_watchlist(user_id=sample_user, film_id=fake_film_id)
+
+
+def test_add_to_watchlist_allows_explicit_private_visibility(app, sample_user, sample_film):
+    """
+    The route should allow callers to explicitly save a watchlist entry as private.
+    """
+    client = app.test_client()
+
+    response = client.post(
+        f"/watchlist/{sample_user}/add",
+        json={"film_id": sample_film, "public": False},
+    )
+
+    assert response.status_code == 201
+    assert response.get_json()["public"] is False
+
+    in_db = WatchlistEntry.query.filter_by(
+        user_id=sample_user, film_id=sample_film
+    ).first()
+    assert in_db is not None
+    assert in_db.public is False
 
 
 def test_remove_from_watchlist_deletes_entry(app, sample_user, sample_film):

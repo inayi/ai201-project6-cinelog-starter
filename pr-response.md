@@ -55,5 +55,16 @@ I updated the changes in watchlist_service.py to match the intent of the feature
 Kept my version since my version contains the other version's contents
 **How I verified no conflict remains:**
 I reran git rebase --continue and it didn't raise conflict.
+
+## Additional Test
+I added a watchlist test for adding a nonexistent film because it checks the service's validation path, not just the happy path and duplicate handling. This gives the watchlist feature coverage for the same missing-film rule that the collection service already enforces, so both services stay consistent.
+
+## Visibility Toggle
+I updated the watchlist add endpoint so callers can pass `public` explicitly instead of relying only on the default. This makes the visibility choice intentional at the API level, and I added a test that posts `public: false` to confirm the watchlist entry is saved as private when requested.
+
 ## PR Description
-<!-- Written at the end — feature overview, design decisions, manual testing steps -->
+The watchlist feature lets a user save films for later, view the saved list, and remove films they no longer want to keep. The service layer now includes `add_to_watchlist()`, `remove_from_watchlist()`, and `get_watchlist()`, and the route layer exposes GET, POST, and DELETE endpoints that follow the same pattern as the collection feature.
+
+Design-wise, the feature keeps watchlists public by default so the list can support discovery and sharing, and it sorts entries by `date_added` so the newest saves appear first. The add path also prevents duplicates by checking whether a user already has the same film saved before inserting a new row.
+
+To manually test the feature, start the app, add a film to a user's watchlist with `POST /watchlist/<user_id>/add`, verify it appears with `GET /watchlist/<user_id>`, try the same add again to confirm the duplicate error, and then remove it with `DELETE /watchlist/<user_id>/remove`. After removal, `GET /watchlist/<user_id>` should no longer include that film.
