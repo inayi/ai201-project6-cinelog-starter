@@ -50,8 +50,10 @@ I updated the changes in watchlist_service.py to match the intent of the feature
 
 ## Comment 6 — Rebase
 **What conflicted:**
+.gitignore, my version has .pytest_cache/ but the other version doesn't
 **How I resolved it:**
+Kept my version since my version contains the other version's contents
 **How I verified no conflict remains:**
-
+I reran git rebase --continue and it didn't raise conflict.
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
