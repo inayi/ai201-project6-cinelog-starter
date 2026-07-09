@@ -68,3 +68,7 @@ The watchlist feature lets a user save films for later, view the saved list, and
 Design-wise, the feature keeps watchlists public by default so the list can support discovery and sharing, and it sorts entries by `date_added` so the newest saves appear first. The add path also prevents duplicates by checking whether a user already has the same film saved before inserting a new row.
 
 To manually test the feature, start the app, add a film to a user's watchlist with `POST /watchlist/<user_id>/add`, verify it appears with `GET /watchlist/<user_id>`, try the same add again to confirm the duplicate error, and then remove it with `DELETE /watchlist/<user_id>/remove`. After removal, `GET /watchlist/<user_id>` should no longer include that film.
+
+## git log screenshot
+
+![git log --oneline](image.png)
