@@ -10,7 +10,7 @@ For Comment 5, I asked whether the sort-order change should be described as a fi
 ## Comment 1 — Rename
 **What I did:**
 
-I renamed `save_to_watchlist()` to `add_to_watchlist()` in [services/watchlist_service.py](services/watchlist_service.py) so the function name matches the rest of the codebase's verb-to-noun convention. After that, I updated every call site and import that referenced the old name so the service and routes stayed consistent.
+I renamed `save_to_watchlist()` to `add_to_watchlist()` in [services/watchlist_service.py](services/watchlist_service.py) so the function name matches the rest of the codebase's verb-to-noun convention. After that, I used VS Code's "Find All References" to locate and update every call site and import that referenced the old name so the service and routes stayed consistent.
 
 **How I verified:**
 
@@ -20,7 +20,7 @@ I ran the watchlist test file after the rename and confirmed the feature still p
 ## Comment 2 — Deduplication
 **What I did:**
 
-I added duplicate-check logic to `add_to_watchlist()` in [services/watchlist_service.py](services/watchlist_service.py). Before creating a new `WatchlistEntry`, the service now checks whether the same `user_id` and `film_id` already exist and raises `AlreadyInWatchlistError` instead of inserting a second row.
+I added duplicate-check logic to `add_to_watchlist()` in [services/watchlist_service.py](services/watchlist_service.py) following the example of add_to_collection() in [services/collection_service.py](services/collection_service.py). Before creating a new `WatchlistEntry`, the service now checks whether the same `user_id` and `film_id` already exist and raises `AlreadyInWatchlistError` instead of inserting a second row.
 
 **How I verified:**
 
@@ -29,8 +29,7 @@ I added a duplicate-add test in [tests/test_watchlist.py](tests/test_watchlist.p
 
 ## Comment 3 — Missing test
 **What I did:**
-
-I moved the shared test fixtures into [tests/conftest.py](tests/conftest.py) so both collection and watchlist tests can reuse the same `app`, `sample_user`, and `sample_film` setup through pytest's built-in fixture discovery. I then added [tests/test_watchlist.py](tests/test_watchlist.py) to cover the basic watchlist add flow and make sure the new service behavior is exercised by an automated test.
+I moved the shared test fixtures into [tests/conftest.py](tests/conftest.py) so both collection and watchlist tests can reuse the same `app`, `sample_user`, and `sample_film` setup through pytest's built-in fixture discovery. I then added [tests/test_watchlist.py](tests/test_watchlist.py), modeled after `test_add_to_collection_nonexistent_film_raises`, to cover the basic watchlist add flow and make sure the new service behavior is exercised by an automated test. The new `test_add_to_watchlist_nonexistent_film_raises` specifically checks that a missing `film_id` raises `FilmNotFoundError`.
 
 **How I verified:**
 
